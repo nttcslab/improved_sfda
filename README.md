@@ -1,6 +1,6 @@
 <div align="center">
 
-# [CVPR2024] Understanding and Improving Source-free Domain Adaptation from a Theoretical Perspective
+# Official implementation of the paper "Understanding and Improving Source-free Domain Adaptation from a Theoretical Perspective" [CVPR2024]
 
 <a href="https://pytorch.org/get-started/locally/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white"></a>
 <a href="https://pytorchlightning.ai/"><img alt="Lightning" src="https://img.shields.io/badge/-Lightning-792ee5?logo=pytorchlightning&logoColor=white"></a>
@@ -16,10 +16,11 @@ This is an official implementation of the CVPR paper "Understanding and Improvin
 
 Source-free Domain Adaptation (SFDA) is an emerging and challenging research area that addresses the problem of unsupervised domain adaptation (UDA) without source data. Though numerous successful methods have been proposed for SFDA, a theoretical understanding of why these methods work well is still absent. In this paper, we shed light on the theoretical perspective of existing SFDA methods. Specifically, we find that SFDA loss functions comprising discriminability and diversity losses work in the same way as the training objective in the theory of self-training based on the expansion assumption, which shows the existence of the target error bound. This finding brings two novel insights that enable us to build an improved SFDA method comprising 1) Model Training with Auto-Adjusting Diversity Constraint and 2) Augmentation Training with Teacher-Student Framework, yielding a better recognition performance. Extensive experiments on three benchmark datasets demonstrate the validity of the theoretical analysis and our method.
 
-## Video
-
+## YouTube
 <div align="center">
-<iframe src="https://www.youtube.com/embed/SnWqZ_lb93Y" width="720" height="405"></iframe>
+
+<a href="https://www.youtube.com/watch?v=SnWqZ_lb93Y"><img src="https://github.com/user-attachments/assets/86fa69a1-ee69-468f-ac99-d38fcb873934" alt="youtube video" width="600"/></a>
+
 </div>
 
 ## How to run
