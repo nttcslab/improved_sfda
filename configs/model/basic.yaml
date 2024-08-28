@@ -1,0 +1,45 @@
+_target_: src.models.basic_module.BasicLitModule
+
+net:
+  _target_: src.models.components.classifier.Classifier
+  backbone:
+    _target_: timm.create_model
+    model_name: "tv_resnet50"
+    pretrained: True
+    num_classes: 0
+  num_classes: 31
+  bottleneck: 
+    _target_: src.models.components.net_utils.BaseBottleneck
+    in_features: 2048
+    out_features: ${model.net.bottleneck_dim}
+  bottleneck_dim: 256
+  head: 
+    _target_: src.models.components.net_utils.BaseHead
+    in_features: ${model.net.bottleneck_dim}
+    num_classes: ${model.net.num_classes}
+  finetune: True
+
+train_acc:
+  _target_: torchmetrics.classification.accuracy.Accuracy
+  task: "multiclass"
+  num_classes: ${model.net.num_classes}
+val_acc:
+  _target_: torchmetrics.classification.accuracy.Accuracy
+  task: "multiclass"
+  num_classes: ${model.net.num_classes}
+test_acc:
+  _target_: torchmetrics.classification.accuracy.Accuracy
+  task: "multiclass"
+  num_classes: ${model.net.num_classes}
+
+optimizer_args:
+  lr: 0.01
+  momentum: 0.9
+  nesterov: True
+  weight_decay: 0.001
+scheduler_args:
+  type: "exponential"
+  gamma: 10
+  power: 0.0
+
+output_dir: ${paths.output_dir}

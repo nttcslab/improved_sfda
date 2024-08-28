@@ -1,0 +1,89 @@
+_target_: src.models.ours_pb_ta_directed_module.OursPBTADirectedLitModule
+
+net:
+  _target_: src.models.components.classifier.Classifier
+  backbone:
+    _target_: timm.create_model
+    model_name: "tv_resnet50"
+    pretrained: True
+    num_classes: 0
+  num_classes: 31
+  bottleneck: 
+    _target_: src.models.components.net_utils.BaseBottleneck
+    in_features: 2048
+    out_features: ${model.net.bottleneck_dim}
+  bottleneck_dim: 256
+  head: 
+    _target_: src.models.components.net_utils.BaseHead
+    in_features: ${model.net.bottleneck_dim}
+    num_classes: ${model.net.num_classes}
+  finetune: True
+
+train_acc:
+  _target_: torchmetrics.classification.accuracy.Accuracy
+  task: "multiclass"
+  num_classes: ${model.net.num_classes}
+val_acc:
+  _target_: torchmetrics.classification.accuracy.Accuracy
+  task: "multiclass"
+  num_classes: ${model.net.num_classes}
+test_acc:
+  _target_: torchmetrics.classification.accuracy.Accuracy
+  task: "multiclass"
+  num_classes: ${model.net.num_classes}
+
+optimizer_args:
+  lr: 0.003
+  momentum: 0.9
+  nesterov: True
+  weight_decay: 0.0005
+scheduler_args:
+  type: "exponential"
+  gamma: 10
+  power: 0.0
+augment_args:
+  num_sub_policies: 25
+  temperature: 0.05
+  operation_count: 2
+  num_chunks: 4
+aug_optimizer_args:
+  lr: 0.001
+  weight_decay: 0.01
+
+pre_augment:
+  _target_: torchvision.transforms.transforms.Compose
+  transforms:
+  - _target_: torchvision.transforms.transforms.RandomCrop
+    size: 224
+  - _target_: torchvision.transforms.transforms.RandomHorizontalFlip
+
+post_augment:
+  _target_: torchvision.transforms.transforms.Compose
+  transforms:
+  - _target_: torchvision.transforms.transforms.Lambda
+    lambd:
+      _target_: torch.nn.Identity
+
+normalizer:
+  _target_: torchvision.transforms.transforms.Compose
+  transforms:
+  - _target_: torchvision.transforms.transforms.Normalize
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+
+pretrained_path: null
+lambda_neg: 0.45
+lambda_aug: 0.5
+lambda_strong: 0.5
+net_momentum: 0.99
+output_dir: ${paths.output_dir}
+optimize_params: "back_bottle"
+interval_epoch: 3
+warmup_epoch: 0
+aug_loss_type: "nonsatent"
+
+init_aug: "autoaug"
+init_aug_prob: 0.9
+K: 3
+M: 6
+MM: 6

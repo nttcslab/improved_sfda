@@ -1,0 +1,68 @@
+_target_: src.data.tgt_train_datamodule.TgtTrainDataModule
+
+dataset:
+  _target_: src.data.components.office31.Office31
+  root: ${paths.data_dir}/office31
+  task: "A"
+  download: True
+
+train_transforms:
+  _target_: torchvision.transforms.transforms.Compose
+  transforms:
+  - _target_: torchvision.transforms.transforms.RandomResizedCrop
+    size: 224
+    scale: [0.2, 1.0]
+  - _target_: torchvision.transforms.transforms.ColorJitter
+    brightness: 0.8
+    contrast: 0.8
+    saturation: 0.5
+    hue: 0.2
+  - _target_: torchvision.transforms.transforms.RandomGrayscale
+    p: 0.2
+  - _target_: torchvision.transforms.transforms.RandomRotation
+    degrees: [-2, 2]
+  - _target_: torchvision.transforms.transforms.RandomPosterize
+    bits: 8
+    p: 0.2
+  - _target_: torchvision.transforms.transforms.RandomEqualize
+    p: 0.2
+  - _target_: torchvision.transforms.transforms.GaussianBlur
+    kernel_size: 3
+  - _target_: torchvision.transforms.transforms.RandomHorizontalFlip
+  - _target_: torchvision.transforms.transforms.ToTensor
+  - _target_: torchvision.transforms.transforms.Normalize
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+
+strong_transforms:
+  _target_: torchvision.transforms.transforms.Compose
+  transforms:
+  - _target_: torchvision.transforms.transforms.Resize
+    size: [256, 256]
+  - _target_: torchvision.transforms.transforms.RandomCrop
+    size: 224
+  - _target_: torchvision.transforms.transforms.RandomHorizontalFlip
+  - _target_: torchvision.transforms.transforms.ToTensor
+  - _target_: torchvision.transforms.transforms.Normalize
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+
+test_transforms:
+  _target_: torchvision.transforms.transforms.Compose
+  transforms:
+  - _target_: torchvision.transforms.transforms.Resize
+    size: [256, 256]
+  - _target_: torchvision.transforms.transforms.CenterCrop
+    size: 224
+  - _target_: torchvision.transforms.transforms.ToTensor
+  - _target_: torchvision.transforms.transforms.Normalize
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+
+
+M: 3
+K: 3
+
+batch_size: 64
+num_workers: 0
+pin_memory: False

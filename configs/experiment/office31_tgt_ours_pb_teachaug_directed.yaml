@@ -1,0 +1,82 @@
+# @package _global_
+
+# to execute this experiment run:
+# python run.py experiment=example_simple.yaml
+
+defaults:
+  - override /trainer: default.yaml
+  - override /model: ours_pbta_directed.yaml
+  - override /data: tgt_teachaug_train_datamodule.yaml
+  - override /callbacks: default.yaml
+  - override /logger: many_loggers.yaml
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+# name of the run determines folder name in logs
+# it's also accessed by loggers
+
+seed: 1
+
+source_task: "A"
+target_task: "D"
+
+data:
+  dataset:
+    _target_: src.data.components.office31.Office31
+    root: ${paths.data_dir}/office31
+    task: ${target_task}
+    download: True
+  batch_size: 64
+  num_workers: 8
+  pin_memory: True
+  M: 1
+  K: 1
+
+model:
+  net:
+    num_classes: 31
+  pretrained_path: ${paths.root_dir}/pretrained_model/office31/${source_task}_seed${seed}_resnet50.pth
+
+  optimizer_args:
+    lr: 0.003
+    momentum: 0.9
+    nesterov: True
+    weight_decay: 0.0005
+  scheduler_args:
+    type: "exponential"
+    power: 0.0
+    gamma: 10.0
+  aug_optimizer_args:
+    lr: 0.0005
+    weight_decay: 0.01
+
+  lambda_neg: 0.4
+  lambda_neg_2: 0.4
+  lambda_aug: 1.0
+  lambda_strong: 0.5
+  
+  net_momentum: 0.99
+
+  warmup_epoch: 0
+  interval_epoch: 4
+
+  init_aug: "autoaug"
+  init_aug_prob: 0.99
+
+  K: 3
+  M: 3
+  MM: 3
+
+  optimize_params: "back_bottle"
+
+trainer:
+  max_epochs: 133 # including data augmentation epoch
+
+task_name: Office31_${source_task}2${target_task}
+method_name: ours_pbta_directed
+
+logger:
+  mlflow:
+    experiment_name: ${task_name}
+    run_name: ${method_name}

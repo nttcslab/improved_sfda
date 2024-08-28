@@ -1,0 +1,92 @@
+# @package _global_
+
+# to execute this experiment run:
+# python run.py experiment=example_simple.yaml
+
+defaults:
+  - override /trainer: default.yaml
+  - override /model: basic.yaml
+  - override /data: src_train_datamodule.yaml
+  - override /callbacks: default.yaml
+  - override /logger: many_loggers.yaml
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+# name of the run determines folder name in logs
+# it's also accessed by loggers
+
+seed: 1
+
+source_task: "Synthetic"
+
+data:
+  dataset:
+    _target_: src.data.components.visda2017.VisDA2017
+    root: ${paths.data_dir}/visda2017
+    task: ${source_task}
+    download: True
+  batch_size: 64
+  num_workers: 8
+  pin_memory: True
+
+model:
+  net:
+    _target_: src.models.components.classifier.Classifier
+    backbone:
+      _target_: timm.create_model
+      model_name: "tv_resnet101"
+      pretrained: True
+      num_classes: 0
+    num_classes: 12
+    bottleneck: 
+      _target_: src.models.components.net_utils.BaseBottleneck
+      in_features: 2048
+      out_features: ${model.net.bottleneck_dim}
+      apply_init: False
+    bottleneck_dim: 256
+    head: 
+      _target_: src.models.components.net_utils.BaseHead
+      in_features: ${model.net.bottleneck_dim}
+      num_classes: ${model.net.num_classes}
+      apply_init: False
+    finetune: True
+
+  save_path_net_state_dict: ${paths.root_dir}/pretrained_model/visda2017/${source_task}_seed${seed}_resnet101.pth
+
+  optimizer_args:
+    lr: 0.001
+    momentum: 0.9
+    nesterov: True
+    weight_decay: 0.001
+  scheduler_args:
+    type: "exponential"
+    power: 0.75
+    gamma: 10.0
+
+  train_acc:
+    _target_: torchmetrics.classification.accuracy.Accuracy
+    task: "multiclass"
+    average: "macro"
+    num_classes: ${model.net.num_classes}
+  val_acc:
+    _target_: torchmetrics.classification.accuracy.Accuracy
+    task: "multiclass"
+    average: "macro"
+    num_classes: ${model.net.num_classes}
+  test_acc:
+    _target_: torchmetrics.classification.accuracy.Accuracy
+    task: "multiclass"
+    average: "macro"
+    num_classes: ${model.net.num_classes}
+
+trainer:
+  max_epochs: 10
+
+task_name: VisDA2017_${source_task}
+method_name: basic
+
+logger:
+  mlflow:
+    experiment_name: ${task_name}
+    run_name: ${method_name}

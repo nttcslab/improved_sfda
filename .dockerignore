@@ -1,0 +1,14 @@
+.devcontainer/
+.pytest_cache/
+configs/
+data/
+logs/
+mlruns/
+notebooks/
+pretrained_model/
+scripts/
+shell_scripts/
+src/
+tests/
+*.out
+image.sif

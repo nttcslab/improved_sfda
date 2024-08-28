@@ -1,0 +1,48 @@
+# @package _global_
+
+# to execute this experiment run:
+# python run.py experiment=example_simple.yaml
+
+defaults:
+  - override /trainer: default.yaml
+  - override /model: basic.yaml
+  - override /data: src_train_datamodule.yaml
+  - override /callbacks: default.yaml
+  - override /logger: many_loggers.yaml
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+# name of the run determines folder name in logs
+# it's also accessed by loggers
+
+seed: 1
+
+source_task: "A"
+
+data:
+  dataset:
+    _target_: src.data.components.office31.Office31
+    root: ${paths.data_dir}/office31
+    task: ${source_task}
+    download: True
+  batch_size: 64
+  num_workers: 8
+  pin_memory: True
+
+model:
+  net:
+    num_classes: 31
+  save_path_net_state_dict: ${paths.root_dir}/pretrained_model/office31/${source_task}_seed${seed}_resnet50.pth
+  scheduler_args: null
+
+trainer:
+  max_epochs: 50
+
+task_name: Office31_${source_task}
+method_name: basic
+
+logger:
+  mlflow:
+    experiment_name: ${task_name}
+    run_name: ${method_name}
