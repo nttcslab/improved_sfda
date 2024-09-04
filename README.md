@@ -93,7 +93,7 @@ Please see details in: [configs/experiment/](configs/experiment/)
 The logs are managed by [mlflow](https://mlflow.org).
 
 ```bash
-cd logs
+cd logs/mlflow
 
 mlflow ui
 ```
